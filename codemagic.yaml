@@ -22,27 +22,31 @@ workflows:
     scripts:
       - name: Set iOS deployment target
         script: |
-          # تعديل الحد الأدنى للإصدار في إعدادات مشروع Xcode إلى 15.0
+          # تعديل الحد الأدنى للإصدار
           sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;/IPHONEOS_DEPLOYMENT_TARGET = 15.0;/g' ios/Runner.xcodeproj/project.pbxproj
-          
-          # تعديل الحد الأدنى للإصدار في ملف Podfile إلى 15.0 لحل مشكلة CocoaPods
           sed -i '' "s/^platform :ios, .*/platform :ios, '15.0'/g" ios/Podfile
           sed -i '' "s/^# platform :ios, .*/platform :ios, '15.0'/g" ios/Podfile
+
+      - name: Clean and Get Dependencies
         script: |
+          # تعطيل Swift Package Manager من إعدادات فلاتر لتجاوز خطأ الـ PBXGroup
+          flutter config --no-enable-swift-package-manager
+
           flutter clean
-          flutter pub upgrade  # تحديث الحزم
+          flutter pub upgrade
           cd ios
-          rm -rf Pods          # مسح مجلد الـ Pods القديم
-          rm -rf Podfile.lock  # مسح ملف القفل القديم
-          pod repo update      # تحديث مستودع الـ Pods
-          pod install          # تثبيت الـ Pods من جديد
+          rm -rf Pods
+          rm -rf Podfile.lock
+          pod repo update
+          pod install
 
       - name: Apply Vault Profiles
         script: xcode-project use-profiles
 
       - name: Build IPA
         script: |
-          flutter build ipa --release --no-swift-package-manager --export-options-plist=$HOME/export_options.plist
+          # العودة للأمر الأصلي النظيف
+          flutter build ipa --release --export-options-plist=$HOME/export_options.plist
 
     artifacts:
       - build/ios/ipa/*.ipa
