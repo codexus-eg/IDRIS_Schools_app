@@ -1,0 +1,13 @@
+Verification:
+
+Android IDs:
+14:    namespace = "com.idrisschool.app"
+28:        applicationId = "com.idrisschool.app"
+
+iOS Bundle IDs:
+199:        PRODUCT_BUNDLE_IDENTIFIER = com.idrisschool.app;
+200:        PRODUCT_NAME = "IDRIS Schools";
+220:        PRODUCT_BUNDLE_IDENTIFIER = com.idrisschool.app;
+221:        PRODUCT_NAME = "IDRIS Schools";
+267:        PRODUCT_BUNDLE_IDENTIFIER = com.idrisschool.app;
+268:        PRODUCT_NAME = "IDRIS Schools";

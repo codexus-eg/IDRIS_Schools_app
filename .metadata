@@ -1,0 +1,25 @@
+# This file tracks properties of this Flutter project.
+version:
+  revision: "flutterlab-import-project"
+  channel: "stable"
+
+project_type: app
+
+migration:
+  platforms:
+    - platform: root
+      create_revision: flutterlab-import-project
+      base_revision: flutterlab-import-project
+    - platform: android
+      create_revision: flutterlab-import-project
+      base_revision: flutterlab-import-project
+    - platform: ios
+      create_revision: flutterlab-import-project
+      base_revision: flutterlab-import-project
+    - platform: web
+      create_revision: flutterlab-import-project
+      base_revision: flutterlab-import-project
+
+  unmanaged_files:
+    - 'lib/main.dart'
+    - 'ios/Runner.xcodeproj/project.pbxproj'
