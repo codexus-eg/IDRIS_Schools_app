@@ -1,0 +1,54 @@
+workflows:
+  idris-schools-ios-testflight-workflow:
+    name: IDRIS Schools iOS Build and Publish to TestFlight
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+
+    integrations:
+      # نفس الـ integration المضافة في حسابك على كودماجيك
+      app_store_connect: noourway
+
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+
+      ios_signing:
+        provisioning_profiles:
+          - IDRIS_Schools_Profile # اسم البروفايل الجديد الخاص بـ IDRIS Schools
+        certificates:
+          - ios_cert_manual # نفس اسم الشهادة (Certificate) السابقة بما أنه نفس الحساب المطور
+
+    scripts:
+      - name: Set iOS deployment target
+        script: |
+          # تم تعديل الإصدار هنا إلى 13.0 ليتوافق مع الـ Podfile الخاص بـ IDRIS Schools
+          sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;/IPHONEOS_DEPLOYMENT_TARGET = 13.0;/g' ios/Runner.xcodeproj/project.pbxproj
+
+      - name: Clean and Get Dependencies
+        script: |
+          flutter clean
+          flutter pub upgrade  # تحديث الحزم
+          cd ios
+          rm -rf Pods          # مسح مجلد الـ Pods القديم
+          rm -rf Podfile.lock  # مسح ملف القفل القديم
+          pod repo update      # تحديث مستودع الـ Pods
+          pod install          # تثبيت الـ Pods من جديد
+
+      - name: Apply Vault Profiles
+        script: xcode-project use-profiles
+
+      - name: Build IPA
+        script: |
+          flutter build ipa --release --export-options-plist=$HOME/export_options.plist
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+      email:
+        recipients:
+          - codexus.eg@gmail.com
