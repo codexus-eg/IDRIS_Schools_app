@@ -28,12 +28,8 @@ workflows:
           flutter config --no-enable-swift-package-manager
 
           flutter clean
-          flutter pub upgrade
-          cd ios
-          rm -rf Pods
-          rm -rf Podfile.lock
-          pod repo update
-          pod install
+          flutter pub get
+          rm -f ios/Podfile.lock
 
       - name: Apply Vault Profiles
         script: xcode-project use-profiles
