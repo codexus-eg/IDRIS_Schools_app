@@ -50,6 +50,10 @@
     <key>CADisableMinimumFrameDurationOnPhone</key>
     <true/>
 
+    <!-- إجبار التطبيق على الشاشة الكاملة لتجاوز رفض أبل لأجهزة الآيباد -->
+    <key>UIRequiresFullScreen</key>
+    <true/>
+
     <!-- نصوص طلب الصلاحيات -->
     <key>NSPhotoLibraryUsageDescription</key>
     <string>IDRIS Schools needs photo library access only when the user chooses an image to attach to a discussion, assignment, or answer.</string>
