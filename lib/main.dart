@@ -6,11 +6,12 @@ import 'core/routes/app_routes.dart';
 import 'features/home/home_screen.dart';
 import 'features/splash/splash_screen.dart';
 
-Future<void> main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  await SystemChrome.setPreferredOrientations([
+  // إزالة الـ await لمنع تجميد محرك فلاتر على iOS قبل بناء الشاشة
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
 
