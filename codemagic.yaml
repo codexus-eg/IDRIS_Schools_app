@@ -23,19 +23,29 @@ workflows:
         script: |
           sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;/IPHONEOS_DEPLOYMENT_TARGET = 15.0;/g' ios/Runner.xcodeproj/project.pbxproj
 
-      - name: Clean and Get Dependencies
+      - name: Clean Git Cache and Prepare iOS Build
         script: |
+          # تعطيل SPM لمنع مشاكل البنية القديمة
           flutter config --no-enable-swift-package-manager
 
-          flutter clean
-          flutter pub get
+          # مسح الملفات المؤقتة التي قد تحتوي على مسارات جهازك المحلي وتسبب الخطأ
+          rm -f ios/Flutter/Generated.xcconfig
+          rm -f ios/Flutter/flutter_export_environment.sh
+          rm -rf ios/Pods
           rm -f ios/Podfile.lock
+
+          # جلب الحزم
+          flutter pub get
+
+          # بناء نسخة iOS عادية أولاً لضمان توليد ملفات Flutter.h وربطها بشكل صحيح
+          flutter build ios --release --no-codesign
 
       - name: Apply Vault Profiles
         script: xcode-project use-profiles
 
       - name: Build IPA
         script: |
+          # الآن يمكننا بناء نسخة الـ IPA بأمان لأن كل الملفات موجودة
           flutter build ipa --release --export-options-plist=$HOME/export_options.plist
 
     artifacts:
