@@ -25,7 +25,6 @@
     <key>LSRequiresIPhoneOS</key>
     <true/>
     
-    <!-- دعم اللغة العربية للـ Pop-ups الخاصة بالصلاحيات -->
     <key>CFBundleLocalizations</key>
     <array>
         <string>ar</string>
@@ -49,12 +48,9 @@
     <true/>
     <key>CADisableMinimumFrameDurationOnPhone</key>
     <true/>
-
-    <!-- إجبار التطبيق على الشاشة الكاملة لتجاوز رفض أبل لأجهزة الآيباد -->
     <key>UIRequiresFullScreen</key>
     <true/>
 
-    <!-- نصوص طلب الصلاحيات -->
     <key>NSPhotoLibraryUsageDescription</key>
     <string>IDRIS Schools needs photo library access only when the user chooses an image to attach to a discussion, assignment, or answer.</string>
     <key>NSCameraUsageDescription</key>
@@ -62,7 +58,6 @@
     <key>NSMicrophoneUsageDescription</key>
     <string>IDRIS Schools may use the microphone only if the user records or selects a media attachment that requires audio access.</string>
 
-    <!-- السماح بفتح الروابط الخارجية (url_launcher) -->
     <key>LSApplicationQueriesSchemes</key>
     <array>
         <string>https</string>
@@ -72,7 +67,6 @@
         <string>whatsapp</string>
     </array>
 
-    <!-- السماح بفتح الروابط غير المشفرة داخل التطبيق (webview_flutter) -->
     <key>NSAppTransportSecurity</key>
     <dict>
         <key>NSAllowsArbitraryLoads</key>

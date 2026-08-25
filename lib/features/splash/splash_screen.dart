@@ -87,27 +87,20 @@ class _SplashScreenState extends State<SplashScreen>
     if (status != AnimationStatus.completed) return;
     if (!mounted || !widget.autoNavigate) return;
 
-    try {
-      final AppUserSession? session = await AppSessionService().load();
-      if (!mounted) return;
+    final AppUserSession? session = await AppSessionService().load();
+    if (!mounted) return;
 
-      if (session != null && session.token.isNotEmpty) {
-        final Widget screen = session.userType == AppUserType.schoolStudent
-            ? SchoolStudentHomeScreen(session: session)
-            : session.userType == AppUserType.onlineStudent
-                ? OnlineStudentHomeScreen(session: session)
-                : PublicStudentHomeScreen(session: session);
-        Navigator.of(context)
-            .pushReplacement(MaterialPageRoute(builder: (_) => screen));
-        return;
-      }
-    } catch (e) {
-      // تجاهل الخطأ والانتقال للشاشة الرئيسية لضمان عدم وقوف التطبيق على الاسبلاش
+    if (session != null && session.token.isNotEmpty) {
+      final Widget screen = session.userType == AppUserType.schoolStudent
+          ? SchoolStudentHomeScreen(session: session)
+          : session.userType == AppUserType.onlineStudent
+              ? OnlineStudentHomeScreen(session: session)
+              : PublicStudentHomeScreen(session: session);
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => screen));
+      return;
     }
 
-    if (mounted) {
-      Navigator.of(context).pushReplacementNamed(widget.nextRoute);
-    }
+    Navigator.of(context).pushReplacementNamed(widget.nextRoute);
   }
 
   @override
@@ -244,20 +237,11 @@ class _LanguageChip extends StatelessWidget {
         child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('AR',
-                style: TextStyle(
-                    color: AppColors.schoolRed,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w900)),
+            Text('AR', style: TextStyle(color: AppColors.schoolRed, fontSize: 11, fontWeight: FontWeight.w900)),
             SizedBox(width: 7),
-            Icon(Icons.language_rounded,
-                size: 16, color: AppColors.primaryBlue),
+            Icon(Icons.language_rounded, size: 16, color: AppColors.primaryBlue),
             SizedBox(width: 7),
-            Text('EN',
-                style: TextStyle(
-                    color: AppColors.primaryBlue,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w900)),
+            Text('EN', style: TextStyle(color: AppColors.primaryBlue, fontSize: 11, fontWeight: FontWeight.w900)),
           ],
         ),
       ),
