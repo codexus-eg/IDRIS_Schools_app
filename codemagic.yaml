@@ -28,10 +28,7 @@ workflows:
           flutter config --no-enable-swift-package-manager
           flutter clean
           flutter pub get
-          cd ios
-          rm -rf Pods Podfile.lock
-          pod install --repo-update
-          cd ..
+          # تم إزالة pod install من هنا لترك Flutter يديرها تلقائياً
 
       - name: Apply Vault Profiles
         script: xcode-project use-profiles
