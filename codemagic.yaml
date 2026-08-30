@@ -23,29 +23,23 @@ workflows:
         script: |
           sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;/IPHONEOS_DEPLOYMENT_TARGET = 15.0;/g' ios/Runner.xcodeproj/project.pbxproj
 
-      - name: Nuke Local Cache and Rebuild Config
+      - name: Setup Flutter Engine and Dependencies
         script: |
+          # 1. تحميل محرك بناء iOS مسبقاً لمنع خطأ Flutter.h تماماً
+          flutter precache --ios
+
+          # 2. تعطيل مدير الحزم التجريبي
           flutter config --no-enable-swift-package-manager
 
-          rm -f ios/Flutter/Generated.xcconfig
-          rm -f ios/Flutter/flutter_export_environment.sh
-          rm -rf ios/Flutter/Flutter.framework
-          rm -rf ios/Flutter/Flutter.podspec
-          rm -rf ios/Pods
-          rm -f ios/Podfile.lock
-          rm -rf ios/.symlinks
-
-          flutter clean
+          # 3. جلب الحزم (بدون أي أوامر تنظيف أو حذف مدمرة)
           flutter pub get
-
-          # إضافة --no-codesign لتجاهل الشهادات في هذه الخطوة المؤقتة
-          flutter build ios --config-only --no-codesign
 
       - name: Apply Vault Profiles
         script: xcode-project use-profiles
 
       - name: Build IPA
         script: |
+          # الاعتماد الكلي على فلاتر لبناء التطبيق بسلاسة
           flutter build ipa --release --export-options-plist=$HOME/export_options.plist
 
     artifacts:
