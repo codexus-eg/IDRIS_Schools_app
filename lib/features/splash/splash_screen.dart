@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -32,6 +34,8 @@ class _SplashScreenState extends State<SplashScreen>
 
   late final AnimationController _mainController;
   late final AnimationController _pulseController;
+  Timer? _navigationTimer;
+  bool _didNavigate = false;
 
   late final Animation<double> _logoAnimation;
   late final Animation<double> _titleAnimation;
@@ -81,13 +85,34 @@ class _SplashScreenState extends State<SplashScreen>
 
     _mainController.addStatusListener(_onStatusChanged);
     _mainController.forward();
+
+    // حماية إضافية للـ iOS release: لو AnimationStatus ما وصل لأي سبب،
+    // أو حصل تأخير في أول frame، نكمل الانتقال بدلاً من شاشة فاضية.
+    _navigationTimer = Timer(
+      _duration + const Duration(milliseconds: 350),
+      () => unawaited(_navigateAfterSplash()),
+    );
   }
 
-  Future<void> _onStatusChanged(AnimationStatus status) async {
+  void _onStatusChanged(AnimationStatus status) {
     if (status != AnimationStatus.completed) return;
-    if (!mounted || !widget.autoNavigate) return;
+    unawaited(_navigateAfterSplash());
+  }
 
-    final AppUserSession? session = await AppSessionService().load();
+  Future<void> _navigateAfterSplash() async {
+    if (_didNavigate || !mounted || !widget.autoNavigate) return;
+    _didNavigate = true;
+    _navigationTimer?.cancel();
+
+    AppUserSession? session;
+    try {
+      session =
+          await AppSessionService().load().timeout(const Duration(seconds: 2));
+    } on Object {
+      // لو SharedPreferences أو أي plugin اتأخر في iOS، ما نوقف التطبيق.
+      session = null;
+    }
+
     if (!mounted) return;
 
     if (session != null && session.token.isNotEmpty) {
@@ -96,7 +121,9 @@ class _SplashScreenState extends State<SplashScreen>
           : session.userType == AppUserType.onlineStudent
               ? OnlineStudentHomeScreen(session: session)
               : PublicStudentHomeScreen(session: session);
-      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => screen));
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => screen),
+      );
       return;
     }
 
@@ -105,6 +132,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void dispose() {
+    _navigationTimer?.cancel();
     _mainController
       ..removeStatusListener(_onStatusChanged)
       ..dispose();
@@ -237,11 +265,20 @@ class _LanguageChip extends StatelessWidget {
         child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('AR', style: TextStyle(color: AppColors.schoolRed, fontSize: 11, fontWeight: FontWeight.w900)),
+            Text('AR',
+                style: TextStyle(
+                    color: AppColors.schoolRed,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900)),
             SizedBox(width: 7),
-            Icon(Icons.language_rounded, size: 16, color: AppColors.primaryBlue),
+            Icon(Icons.language_rounded,
+                size: 16, color: AppColors.primaryBlue),
             SizedBox(width: 7),
-            Text('EN', style: TextStyle(color: AppColors.primaryBlue, fontSize: 11, fontWeight: FontWeight.w900)),
+            Text('EN',
+                style: TextStyle(
+                    color: AppColors.primaryBlue,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900)),
           ],
         ),
       ),

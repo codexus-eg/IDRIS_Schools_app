@@ -1,0 +1,198 @@
+name: Build iOS IPA Clean
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    name: Build IDRIS Schools iOS
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter 3.38.6
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.6'
+          channel: stable
+          cache: true
+
+      - name: Show Flutter version
+        run: flutter --version
+
+      - name: Disable Swift Package Manager
+        run: flutter config --no-enable-swift-package-manager
+
+      # نحفظ فقط تصميم الأيقونة وشاشة البداية من مشروعك القديم
+      - name: Backup iOS branding
+        run: |
+          mkdir -p /tmp/idris_ios_backup
+
+          if [ -d "ios/Runner/Assets.xcassets" ]; then
+            cp -R ios/Runner/Assets.xcassets /tmp/idris_ios_backup/
+          fi
+
+          if [ -f "ios/Runner/Base.lproj/LaunchScreen.storyboard" ]; then
+            cp ios/Runner/Base.lproj/LaunchScreen.storyboard \
+              /tmp/idris_ios_backup/LaunchScreen.storyboard
+          fi
+
+      # نحذف فقط غلاف iOS القديم وننشئ واحد جديد
+      # lib و assets و API والمنطق لا يتم لمسهم
+      - name: Recreate clean iOS wrapper
+        run: |
+          rm -rf ios
+          flutter create \
+            --platforms=ios \
+            --org com.idrisschool \
+            --project-name idris_school_app \
+            .
+
+      - name: Restore IDRIS branding
+        run: |
+          if [ -d "/tmp/idris_ios_backup/Assets.xcassets" ]; then
+            rm -rf ios/Runner/Assets.xcassets
+            cp -R /tmp/idris_ios_backup/Assets.xcassets ios/Runner/
+          fi
+
+          if [ -f "/tmp/idris_ios_backup/LaunchScreen.storyboard" ]; then
+            cp /tmp/idris_ios_backup/LaunchScreen.storyboard \
+              ios/Runner/Base.lproj/LaunchScreen.storyboard
+          fi
+
+      - name: Configure Bundle ID and iOS target
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path("ios/Runner.xcodeproj/project.pbxproj")
+          s = p.read_text()
+
+          # Bundle ID الرئيسي
+          def replace_bundle(match):
+              old = match.group(1).strip()
+
+              if old.endswith(".RunnerTests"):
+                  new = "com.idrisschool.app.RunnerTests"
+              else:
+                  new = "com.idrisschool.app"
+
+              return f"PRODUCT_BUNDLE_IDENTIFIER = {new};"
+
+          s = re.sub(
+              r"PRODUCT_BUNDLE_IDENTIFIER = ([^;]+);",
+              replace_bundle,
+              s
+          )
+
+          # Minimum iOS = 15
+          s = re.sub(
+              r"IPHONEOS_DEPLOYMENT_TARGET = [0-9.]+;",
+              "IPHONEOS_DEPLOYMENT_TARGET = 15.0;",
+              s
+          )
+
+          p.write_text(s)
+          PY
+
+      - name: Configure Info.plist
+        run: |
+          python3 <<'PY'
+          import plistlib
+          from pathlib import Path
+
+          path = Path("ios/Runner/Info.plist")
+
+          with path.open("rb") as f:
+              data = plistlib.load(f)
+
+          data["CFBundleDisplayName"] = "IDRIS Schools"
+          data["CFBundleName"] = "IDRIS Schools"
+
+          data["NSPhotoLibraryUsageDescription"] = (
+              "IDRIS Schools needs photo library access only when "
+              "the user chooses an image to attach."
+          )
+
+          data["NSCameraUsageDescription"] = (
+              "IDRIS Schools may use the camera only when the user "
+              "chooses to capture an image attachment."
+          )
+
+          data["NSMicrophoneUsageDescription"] = (
+              "IDRIS Schools may use the microphone only when required "
+              "for a media attachment."
+          )
+
+          with path.open("wb") as f:
+              plistlib.dump(data, f)
+          PY
+
+      - name: Configure Podfile
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path("ios/Podfile")
+          s = p.read_text()
+
+          # iOS 15
+          if re.search(r"^\s*#?\s*platform\s+:ios", s, re.MULTILINE):
+              s = re.sub(
+                  r"^\s*#?\s*platform\s+:ios.*$",
+                  "platform :ios, '15.0'",
+                  s,
+                  count=1,
+                  flags=re.MULTILINE,
+              )
+          else:
+              s = "platform :ios, '15.0'\n\n" + s
+
+          # مطلوب لـ file_picker / DKPhotoGallery
+          if "use_frameworks!" not in s:
+              s = s.replace(
+                  "target 'Runner' do",
+                  "target 'Runner' do\n  use_frameworks!"
+              )
+
+          p.write_text(s)
+          PY
+
+      - name: Flutter clean
+        run: flutter clean
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Install CocoaPods
+        run: |
+          cd ios
+          rm -rf Pods Podfile.lock
+          pod install
+          cd ..
+
+      - name: Build iOS without signing
+        run: flutter build ios --release --no-codesign
+
+      - name: Verify Runner.app
+        run: |
+          test -d build/ios/iphoneos/Runner.app
+          echo "Runner.app built successfully"
+
+      - name: Create IPA
+        run: |
+          rm -rf Payload
+          mkdir Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/
+          zip -r IDRIS_Schools_V28_BrowserStack.ipa Payload
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: IDRIS-Schools-V28-IPA
+          path: IDRIS_Schools_V28_BrowserStack.ipa
+          retention-days: 7

@@ -89,7 +89,6 @@
       isa = PBXNativeTarget;
       buildConfigurationList = 97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */;
       buildPhases = (
-        9740EEB71CF901F6004384FC /* Run Script */,
         9740EEB61CF901F6004384FC /* Sources */,
         97C146EB1CF9000F007C117D /* Frameworks */,
         97C146EC1CF9000F007C117D /* Resources */,
@@ -145,21 +144,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-    9740EEB71CF901F6004384FC /* Run Script */ = {
-        isa = PBXShellScriptBuildPhase;
-        alwaysOutOfDate = 1;
-        buildActionMask = 2147483647;
-        files = (
-        );
-        inputPaths = (
-        );
-        name = "Run Script";
-        outputPaths = (
-        );
-        runOnlyForDeploymentPostprocessing = 0;
-        shellPath = /bin/sh;
-        shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build";
-    };
     3B06AD1E1E4923F5004D2608 /* Thin Binary */ = {
       isa = PBXShellScriptBuildPhase;
       alwaysOutOfDate = 1;
@@ -195,7 +179,7 @@
         CLANG_ENABLE_MODULES = YES;
         ENABLE_BITCODE = NO;
         GCC_C_LANGUAGE_STANDARD = gnu11;
-        IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+        IPHONEOS_DEPLOYMENT_TARGET = 15.0;
         SDKROOT = iphoneos;
       };
       name = Profile;
@@ -210,7 +194,7 @@
         DEVELOPMENT_TEAM = "";
         ENABLE_BITCODE = NO;
         INFOPLIST_FILE = Runner/Info.plist;
-        IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+        IPHONEOS_DEPLOYMENT_TARGET = 15.0;
         LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks");
         PRODUCT_BUNDLE_IDENTIFIER = com.idrisschool.app;
         PRODUCT_NAME = "IDRIS Schools";
@@ -231,7 +215,7 @@
         DEVELOPMENT_TEAM = "";
         ENABLE_BITCODE = NO;
         INFOPLIST_FILE = Runner/Info.plist;
-        IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+        IPHONEOS_DEPLOYMENT_TARGET = 15.0;
         LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks");
         PRODUCT_BUNDLE_IDENTIFIER = com.idrisschool.app;
         PRODUCT_NAME = "IDRIS Schools";
@@ -250,7 +234,7 @@
         CLANG_ENABLE_MODULES = YES;
         ENABLE_BITCODE = NO;
         GCC_C_LANGUAGE_STANDARD = gnu11;
-        IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+        IPHONEOS_DEPLOYMENT_TARGET = 15.0;
         SDKROOT = iphoneos;
       };
       name = Debug;
@@ -262,7 +246,7 @@
         CLANG_ENABLE_MODULES = YES;
         ENABLE_BITCODE = NO;
         GCC_C_LANGUAGE_STANDARD = gnu11;
-        IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+        IPHONEOS_DEPLOYMENT_TARGET = 15.0;
         SDKROOT = iphoneos;
         VALIDATE_PRODUCT = YES;
       };
@@ -278,7 +262,7 @@
         DEVELOPMENT_TEAM = "";
         ENABLE_BITCODE = NO;
         INFOPLIST_FILE = Runner/Info.plist;
-        IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+        IPHONEOS_DEPLOYMENT_TARGET = 15.0;
         LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks");
         PRODUCT_BUNDLE_IDENTIFIER = com.idrisschool.app;
         PRODUCT_NAME = "IDRIS Schools";
