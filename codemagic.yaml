@@ -23,10 +23,24 @@ workflows:
         script: |
           sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;/IPHONEOS_DEPLOYMENT_TARGET = 15.0;/g' ios/Runner.xcodeproj/project.pbxproj
 
-      - name: Disable SPM and Get Dependencies
+      - name: Nuke Local Cache and Rebuild Config
         script: |
           flutter config --no-enable-swift-package-manager
+
+          # الحذف الإجباري لأي ملفات تحتوي على مسارات جهازك المحلي
+          rm -f ios/Flutter/Generated.xcconfig
+          rm -f ios/Flutter/flutter_export_environment.sh
+          rm -rf ios/Flutter/Flutter.framework
+          rm -rf ios/Flutter/Flutter.podspec
+          rm -rf ios/Pods
+          rm -f ios/Podfile.lock
+          rm -rf ios/.symlinks
+
+          flutter clean
           flutter pub get
+
+          # أمر فلاتر السحري لتهيئة مسارات السيرفر وربط CocoaPods بشكل صحيح قبل البناء
+          flutter build ios --config-only
 
       - name: Apply Vault Profiles
         script: xcode-project use-profiles
