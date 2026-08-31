@@ -19,19 +19,39 @@ workflows:
           - ios_cert_manual
 
     scripts:
-      - name: Set iOS deployment target
+      - name: Heal Broken Xcode Project
         script: |
           sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;/IPHONEOS_DEPLOYMENT_TARGET = 15.0;/g' ios/Runner.xcodeproj/project.pbxproj
 
+          # تثبيت أداة التعامل مع Xcode
+          gem install xcodeproj --no-document
+
+          # السكربت العلاجي لإصلاح الخطأ الذي وقعنا فيه مسبقاً
+          cat << 'EOF' > fix_xcode.rb
+          require 'xcodeproj'
+          project = Xcodeproj::Project.open('ios/Runner.xcodeproj')
+          target = project.targets.first
+          phase = target.frameworks_build_phase
+          group = project.main_group.find_subpath('Flutter', false) || project.main_group.new_group('Flutter', 'Flutter')
+
+          # ربط إطار عمل Flutter و App إجبارياً
+          ['Flutter.framework', 'App.framework'].each do |fw|
+            unless phase.files.any? { |f| f.file_ref && f.file_ref.path == fw }
+              ref = group.files.find { |f| f.path == fw } || group.new_reference(fw)
+              ref.name = fw
+              ref.source_tree = '<group>'
+              phase.add_file_reference(ref)
+              puts "Healed: Added #{fw} to Frameworks"
+            end
+          end
+          project.save
+          EOF
+          ruby fix_xcode.rb
+
       - name: Setup Flutter Engine and Dependencies
         script: |
-          # 1. تحميل محرك بناء iOS مسبقاً لمنع خطأ Flutter.h تماماً
-          flutter precache --ios
-
-          # 2. تعطيل مدير الحزم التجريبي
           flutter config --no-enable-swift-package-manager
-
-          # 3. جلب الحزم (بدون أي أوامر تنظيف أو حذف مدمرة)
+          flutter precache --ios
           flutter pub get
 
       - name: Apply Vault Profiles
@@ -39,7 +59,6 @@ workflows:
 
       - name: Build IPA
         script: |
-          # الاعتماد الكلي على فلاتر لبناء التطبيق بسلاسة
           flutter build ipa --release --export-options-plist=$HOME/export_options.plist
 
     artifacts:
