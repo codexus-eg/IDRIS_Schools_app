@@ -19,13 +19,23 @@ workflows:
           - ios_cert_manual
 
     scripts:
+      - name: Prepare Flutter and iOS Engine
+        script: |
+          flutter config --no-enable-swift-package-manager
+          flutter precache --ios
+          flutter clean
+          flutter pub get
+
+          # هذا هو السطر السحري الذي سيولد ملفات فلاتر (Flutter.h) بنجاح قبل البناء
+          flutter build ios --config-only --no-codesign
+
       - name: Apply Vault Profiles
         script: xcode-project use-profiles
 
       - name: Build IPA
         script: |
-          flutter config --no-enable-swift-package-manager
           sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;/IPHONEOS_DEPLOYMENT_TARGET = 15.0;/g' ios/Runner.xcodeproj/project.pbxproj
+
           flutter build ipa --release --export-options-plist=$HOME/export_options.plist
 
     artifacts:
