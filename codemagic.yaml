@@ -21,27 +21,22 @@ workflows:
     scripts:
       - name: Regenerate macOS Native iOS Project
         script: |
-          # 1. أخذ نسخة احتياطية من ملف الصلاحيات الذي تعبنا فيه
           cp ios/Runner/Info.plist $HOME/Info.plist
 
-          # 2. حذف مجلد الـ iOS القادم من الويندوز تماماً
           rm -rf ios
-
-          # 3. بناء مجلد iOS جديد ونقي تماماً بواسطة سيرفر الماك
           flutter create --platforms=ios --org com.idrisschool .
 
-          # 4. استرجاع ملف الصلاحيات الخاص بنا
           cp $HOME/Info.plist ios/Runner/Info.plist
 
-          # 5. إجبار المشروع على استخدام الـ Bundle ID الخاص بك
           sed -i '' 's/PRODUCT_BUNDLE_IDENTIFIER = [^;]*;/PRODUCT_BUNDLE_IDENTIFIER = com.idrisschool.app;/g' ios/Runner.xcodeproj/project.pbxproj
-
-          # 6. تحديد إصدار iOS 15.0 كحد أدنى
           sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [^;]*;/IPHONEOS_DEPLOYMENT_TARGET = 15.0;/g' ios/Runner.xcodeproj/project.pbxproj
 
-          # 7. تهيئة ملفات فلاتر والبناء (بدون مشاكل الويندوز)
           flutter config --no-enable-swift-package-manager
           flutter pub get
+
+          # توليد الأيقونات الاحترافية قبل البناء
+          dart run flutter_launcher_icons
+
           flutter build ios --config-only --no-codesign
           sed -i '' 's/^# platform :ios, .*/platform :ios, '"'"'15.0'"'"'/g' ios/Podfile
 
